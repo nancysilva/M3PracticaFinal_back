@@ -17,7 +17,7 @@ jobs:
         run: sudo apt-get install zip
 
       - name: Create ZIP file
-        run: zip -r backend.zip . -x "node_modules/" ".git/" ".github/*" ".env"
+        run: zip -r backend.zip . -x "node_modules/*" ".git/*" ".github/*" ".env"
 
       - name: Deploy to Azure App Service
         run: |

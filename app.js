@@ -9,6 +9,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get('/', (req, res) => {
+    res.send('Backend en línea NancySilva🚀');
+});
+
 app.use('/api/usuarios', userRoutes);
 
 export default app;

@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import userController from '../controllers/userController.js';
+import auth from '../middlewares/auth.js';
+
 const router = express.Router();
-const userController = require('../controllers/userController');
-const auth = require('../middlewares/auth');
 
 // Rutas públicas
 router.post('/registro', userController.crearUsuario);
@@ -13,4 +14,4 @@ router.get('/:id', auth, userController.obtenerUsuarioPorId);
 router.put('/:id', auth, userController.actualizarUsuario);
 router.delete('/:id', auth, userController.eliminarUsuario);
 
-module.exports = router;
+export default router;

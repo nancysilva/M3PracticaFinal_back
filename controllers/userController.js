@@ -1,32 +1,40 @@
-const sql = require('../config/db');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-
-require('dotenv').config();
+import poolPromise from '../config/db.js';
+import sql from 'mssql';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const userController = {
     // Crear usuario (registro)
     crearUsuario: async (req, res) => {
-    const { nombre, correo_electronico, contrasena, descripcion } = req.body;
+        const { nombre, correo_electronico, contrasena, descripcion } = req.body;
 
-    try {
-        const hashedPassword = await bcrypt.hash(contrasena, 10);
+        try {
+            const hashedPassword = await bcrypt.hash(contrasena, 10);
 
-        const result = await sql.query`
-        INSERT INTO usuariosNancy_new (nombre, correo_electronico, contrasena, descripcion)
-        OUTPUT INSERTED.id
-        VALUES (${nombre}, ${correo_electronico}, ${hashedPassword}, ${descripcion})
-        `;
+            const pool = await poolPromise;
+            const request = pool.request();
 
+            request.input('nombre', sql.VarChar, nombre);
+            request.input('correo_electronico', sql.VarChar, correo_electronico);
+            request.input('contrasena', sql.VarChar, hashedPassword);
+            request.input('descripcion', sql.VarChar, descripcion);
 
-        const nuevoId = result.recordset[0].id;
+            const result = await request.query(`
+                INSERT INTO usuariosNancy_new (nombre, correo_electronico, contrasena, descripcion)
+                OUTPUT INSERTED.id
+                VALUES (@nombre, @correo_electronico, @contrasena, @descripcion)
+            `);
 
-        res.status(201).json({ mensaje: 'Usuario creado correctamente', id: nuevoId });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error al crear usuario' });
-    }
-},
+            const nuevoId = result.recordset[0].id;
+
+            res.status(201).json({ mensaje: 'Usuario creado correctamente', id: nuevoId });
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Error al crear usuario' });
+        }
+    },
 
 
     // Login
@@ -34,9 +42,14 @@ const userController = {
         const { correo_electronico, contrasena } = req.body;
 
         try {
-            const result = await sql.query`
-                SELECT * FROM usuariosNancy_new WHERE correo_electronico = ${correo_electronico}
-            `;
+            const pool = await poolPromise;
+            const request = pool.request();
+            request.input('correo_electronico', sql.VarChar, correo_electronico);
+
+            const result = await request.query(`
+                SELECT * FROM usuariosNancy_new WHERE correo_electronico = @correo_electronico
+            `);
+
             const usuario = result.recordset[0];
 
             if (!usuario) {
@@ -64,9 +77,10 @@ const userController = {
     // Leer todos los usuarios
     obtenerUsuarios: async (req, res) => {
         try {
-            const result = await sql.query`SELECT * FROM usuariosNancy_new`;
+            const result = await sql.query('SELECT * FROM usuariosNancy_new');
             res.json(result.recordset);
         } catch (err) {
+            console.error(err);
             res.status(500).json({ error: 'Error al obtener usuarios' });
         }
     },
@@ -76,7 +90,12 @@ const userController = {
         const { id } = req.params;
 
         try {
-            const result = await sql.query`SELECT * FROM usuariosNancy_new WHERE id = ${id}`;
+            const pool = await poolPromise;
+            const request = pool.request();
+
+            request.input('id', sql.Int, id);
+
+            const result = await request.query('SELECT * FROM usuariosNancy_new WHERE id = @id');
             const usuario = result.recordset[0];
 
             if (!usuario) {
@@ -85,6 +104,7 @@ const userController = {
 
             res.json(usuario);
         } catch (err) {
+            console.error(err);
             res.status(500).json({ error: 'Error al buscar usuario' });
         }
     },
@@ -95,13 +115,23 @@ const userController = {
         const { nombre, correo_electronico, descripcion } = req.body;
 
         try {
-            await sql.query`
+            const pool = await poolPromise;
+            const request = pool.request();
+
+            request.input('id', sql.Int, id);
+            request.input('nombre', sql.VarChar, nombre);
+            request.input('correo_electronico', sql.VarChar, correo_electronico);
+            request.input('descripcion', sql.VarChar, descripcion);
+
+            await request.query(`
                 UPDATE usuariosNancy_new
-                SET nombre = ${nombre}, correo_electronico = ${correo_electronico}, descripcion = ${descripcion}
-                WHERE id = ${id}
-            `;
+                SET nombre = @nombre, correo_electronico = @correo_electronico, descripcion = @descripcion
+                WHERE id = @id
+            `);
+
             res.json({ mensaje: 'Usuario actualizado correctamente' });
         } catch (err) {
+            console.error(err);
             res.status(500).json({ error: 'Error al actualizar usuario' });
         }
     },
@@ -111,12 +141,19 @@ const userController = {
         const { id } = req.params;
 
         try {
-            await sql.query`DELETE FROM usuariosNancy_new WHERE id = ${id}`;
+            const pool = await poolPromise;
+            const request = pool.request();
+            
+            request.input('id', sql.Int, id);
+
+            await request.query('DELETE FROM usuariosNancy_new WHERE id = @id');
+
             res.json({ mensaje: 'Usuario eliminado correctamente' });
         } catch (err) {
+            console.error(err);
             res.status(500).json({ error: 'Error al eliminar usuario' });
         }
     }
 };
 
-module.exports = userController;
+export default userController;

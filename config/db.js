@@ -1,5 +1,6 @@
-const sql = require('mssql');
-require('dotenv').config();
+import sql from 'mssql';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const dbConfig = {
     user: process.env.DB_USER,
@@ -7,15 +8,18 @@ const dbConfig = {
     server: process.env.DB_SERVER,
     database: process.env.DB_DATABASE,
     options: {
-        encrypt: true, // o false, según tu configuración
-        trustServerCertificate: true
+        encrypt: true,
+        trustServerCertificate: true,
     }
 };
 
-sql.connect(dbConfig).then(() => {
-    console.log('Conectado a SQL Server');
-}).catch(err => {
-    console.error('Error al conectar a la base de datos', err);
-});
+const poolPromise = sql.connect(dbConfig)
+    .then(pool => {
+        console.log('Conectado a SQL Server');
+        return pool;
+    })
+    .catch(err => {
+        console.error('Error al conectar a la base de datos', err);
+    });
 
-module.exports = sql;
+export default poolPromise;  // exportas el poolPromise directamente

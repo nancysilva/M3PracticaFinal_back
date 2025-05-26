@@ -23,4 +23,4 @@ jobs:
         run: |
           curl -X POST "https://pymex.scm.azurewebsites.net/api/zipdeploy" \
           --user "${{ secrets.ZIPDEPLOY_USER }}:${{ secrets.ZIPDEPLOY_PASS }}" \
-          --data-binary @"backend.zip"
+          --data-binary @backend.zip"

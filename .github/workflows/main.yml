@@ -33,10 +33,10 @@ jobs:
           echo "Desplegando a Azure App Service..."
           HTTP_RESPONSE=$(curl -s -o response.txt -w "%{http_code}" \
             -X POST https://pymex.scm.azurewebsites.net/api/zipdeploy \
-            -u $ZIPDEPLOY_USER:$ZIPDEPLOY_PASS \
+            -u "$ZIPDEPLOY_USER:$ZIPDEPLOY_PASS" \
             -T backend.zip)
 
-          if [[ "$HTTP_RESPONSE" -ge 200 && "$HTTP_RESPONSE" -lt 300 ]]; then
+          if [ "$HTTP_RESPONSE" -ge 200 ] && [ "$HTTP_RESPONSE" -lt 300 ]; then
             echo "✅ Despliegue exitoso (HTTP $HTTP_RESPONSE)"
           else
             echo "❌ Error en el despliegue (HTTP $HTTP_RESPONSE)"

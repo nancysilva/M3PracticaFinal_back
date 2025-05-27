@@ -17,10 +17,14 @@ jobs:
         run: sudo apt-get install -y zip
 
       - name: Create ZIP file of backend
-        run: zip -r ../backend.zip . -x "node_modules/*" ".git/*" ".github/*" ".env"
+          run: |
+          cd back
+          zip -r ../backend.zip . -x "node_modules/*" ".git/*" ".github/*" ".env"
 
       - name: Deploy to Azure App Service (Backend)
-        run: |
-          curl -X POST "https://pymex.scm.azurewebsites.net/api/zipdeploy" \
-            --user "${{ secrets.ZIPDEPLOY_USER }}:${{ secrets.ZIPDEPLOY_PASS }}" \
-            --data-binary @backend.zip
+          run: |
+    ls -l backend.zip  # Para verificar que el archivo está aquí
+    curl -X POST "https://pymex.scm.azurewebsites.net/api/zipdeploy" \
+      --user "${{ secrets.ZIPDEPLOY_USER }}:${{ secrets.ZIPDEPLOY_PASS }}" \
+      --data-binary @backend.zip
+

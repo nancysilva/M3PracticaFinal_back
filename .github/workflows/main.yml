@@ -29,7 +29,7 @@ jobs:
           ZIPDEPLOY_USER: ${{ secrets.ZIPDEPLOY_USER }}
           ZIPDEPLOY_PASS: ${{ secrets.ZIPDEPLOY_PASS }}
         run: |
-          echo "Desplegando a Azure App Service con --upload-file..."
-          curl -X POST "https://pymex.scm.azurewebsites.net/api/zipdeploy" \
-            -u "${ZIPDEPLOY_USER}:${ZIPDEPLOY_PASS}" \
-            -T backend.zip 
+          echo "Desplegando a Azure App Service con -T..."
+          curl -X POST https://pymex.scm.azurewebsites.net/api/zipdeploy \
+            -u $ZIPDEPLOY_USER:$ZIPDEPLOY_PASS \
+            -T backend.zip 

@@ -13,18 +13,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install zip
+      - name: Install zip utility
         run: sudo apt-get install -y zip
 
       - name: Create ZIP file of backend
-          run: |
-          cd back
-          zip -r ../backend.zip . -x "node_modules/*" ".git/*" ".github/*" ".env"
+        working-directory: back
+        run: |
+          zip -r ../backend.zip . -x "node_modules/" ".env" ".github/"
+
+      - name: Verify ZIP file exists
+        run: ls -lh backend.zip
 
       - name: Deploy to Azure App Service (Backend)
-          run: |
-    ls -l backend.zip  # Para verificar que el archivo está aquí
-    curl -X POST "https://pymex.scm.azurewebsites.net/api/zipdeploy" \
-      --user "${{ secrets.ZIPDEPLOY_USER }}:${{ secrets.ZIPDEPLOY_PASS }}" \
-      --data-binary @backend.zip
-
+        run: |
+          curl -X POST "https://pymex.scm.azurewebsites.net/api/zipdeploy" \
+            --user "${{ secrets.ZIPDEPLOY_USER }}:${{ secrets.ZIPDEPLOY_PASS }}" \
+            --data-binary @backend.zip

@@ -18,18 +18,28 @@ jobs:
 
       - name: Create ZIP file of backend
         run: |
+          echo "Empaquetando backend..."
           zip -r backend.zip . -x "node_modules/" ".env" ".github/"
 
       - name: Verify ZIP file exists
         run: ls -lh backend.zip
 
-      - name: Deploy to Azure App Service (Backend)
+      - name: Deploy to Azure App Service
         shell: bash
         env:
           ZIPDEPLOY_USER: ${{ secrets.ZIPDEPLOY_USER }}
           ZIPDEPLOY_PASS: ${{ secrets.ZIPDEPLOY_PASS }}
         run: |
-          echo "Desplegando a Azure App Service con -T..."
-          curl -X POST https://pymex.scm.azurewebsites.net/api/zipdeploy \
+          echo "Desplegando a Azure App Service..."
+          HTTP_RESPONSE=$(curl -s -o response.txt -w "%{http_code}" \
+            -X POST https://pymex.scm.azurewebsites.net/api/zipdeploy \
             -u $ZIPDEPLOY_USER:$ZIPDEPLOY_PASS \
-            -T backend.zip 
+            -T backend.zip)
+
+          if [[ "$HTTP_RESPONSE" -ge 200 && "$HTTP_RESPONSE" -lt 300 ]]; then
+            echo "✅ Despliegue exitoso (HTTP $HTTP_RESPONSE)"
+          else
+            echo "❌ Error en el despliegue (HTTP $HTTP_RESPONSE)"
+            cat response.txt
+            exit 1
+          fi

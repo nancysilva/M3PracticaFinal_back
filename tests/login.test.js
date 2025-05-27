@@ -3,7 +3,7 @@ import request from 'supertest';
 import app from '../app.js';
 
 describe('POST /api/usuarios/login', () => {
-  it('debería fallar con credenciales inválidas', async () => {
+  it('Deberá fallar con credenciales inválidas', async () => {
     const res = await request(app)
       .post('/api/usuarios/login')
       .send({
@@ -16,7 +16,7 @@ describe('POST /api/usuarios/login', () => {
   });
 
   // Si quieres probar login exitoso, primero asegúrate de que ese usuario existe
-  it('debería iniciar sesión con credenciales válidas', async () => {
+  it('Deberá iniciar sesión con credenciales válidas', async () => {
     const res = await request(app)
     .post('/api/usuarios/login')
     .send({

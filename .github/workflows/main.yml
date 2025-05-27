@@ -17,9 +17,8 @@ jobs:
         run: sudo apt-get install -y zip
 
       - name: Create ZIP file of backend
-        working-directory: back
         run: |
-          zip -r ../backend.zip . -x "node_modules/" ".env" ".github/"
+          zip -r backend.zip . -x "node_modules/" ".env" ".github/"
 
       - name: Verify ZIP file exists
         run: ls -lh backend.zip

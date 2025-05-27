@@ -24,7 +24,12 @@ jobs:
         run: ls -lh backend.zip
 
       - name: Deploy to Azure App Service (Backend)
+        env:
+          ZIPDEPLOY_USER: ${{ secrets.ZIPDEPLOY_USER }}
+          ZIPDEPLOY_PASS: ${{ secrets.ZIPDEPLOY_PASS }}
         run: |
+          echo "Desplegando a Azure App Service..."
           curl -X POST "https://pymex.scm.azurewebsites.net/api/zipdeploy" \
-            --user "${{ secrets.ZIPDEPLOY_USER }}:${{ secrets.ZIPDEPLOY_PASS }}" \
-            --data-binary @backend.zip
+            -u "$ZIPDEPLOY_USER:$ZIPDEPLOY_PASS" \
+            --header "Content-Type: application/zip" \
+            --data-binary "@backend.zip"

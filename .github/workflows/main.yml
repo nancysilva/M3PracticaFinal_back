@@ -22,5 +22,5 @@ jobs:
       - name: Deploy to Azure App Service
         run: |
           curl -X POST "https://pymex.scm.azurewebsites.net/api/zipdeploy" \
-          --user "${{ secrets.ZIPDEPLOY_USER }}:${{ secrets.ZIPDEPLOY_PASS }}" \
-          --data-binary @"backend.zip"
+            --user "${{ secrets.ZIPDEPLOY_USER }}:${{ secrets.ZIPDEPLOY_PASS }}" \
+            --data-binary @backend.zip

@@ -111,30 +111,38 @@ const userController = {
 
     // Actualizar usuario
     actualizarUsuario: async (req, res) => {
-        const { id } = req.params;
-        const { nombre, correo_electronico, descripcion } = req.body;
+    const { id } = req.params;
+    const { nombre, correo_electronico, descripcion } = req.body;
 
-        try {
-            const pool = await poolPromise;
-            const request = pool.request();
+    try {
+        const pool = await poolPromise;
+        const request = pool.request();
 
-            request.input('id', sql.Int, id);
-            request.input('nombre', sql.VarChar, nombre);
-            request.input('correo_electronico', sql.VarChar, correo_electronico);
-            request.input('descripcion', sql.VarChar, descripcion);
+        request.input('id', sql.Int, id);
+        request.input('nombre', sql.VarChar(100), nombre);
+        request.input('correo_electronico', sql.VarChar(100), correo_electronico);
+        request.input('descripcion', sql.VarChar(200), descripcion);
 
-            await request.query(`
-                UPDATE usuariosNancy_new
-                SET nombre = @nombre, correo_electronico = @correo_electronico, descripcion = @descripcion
-                WHERE id = @id
-            `);
+        const result = await request.query(`
+            UPDATE usuariosNancy_new
+            SET nombre = @nombre,
+                correo_electronico = @correo_electronico,
+                descripcion = @descripcion
+            WHERE id = @id
+        `);
 
-            res.json({ mensaje: 'Usuario actualizado correctamente' });
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Error al actualizar usuario' });
+        // Verificamos si se afectó alguna fila
+        if (result.rowsAffected[0] === 0) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
         }
-    },
+
+        res.status(200).json({ mensaje: 'Usuario actualizado correctamente' });
+
+    } catch (err) {
+        console.error('Error en actualizarUsuario:', err);
+        res.status(500).json({ error: 'Error del servidor al actualizar usuario' });
+    }
+},
 
     // Eliminar usuario
     eliminarUsuario: async (req, res) => {
@@ -146,9 +154,13 @@ const userController = {
             
             request.input('id', sql.Int, id);
 
-            await request.query('DELETE FROM usuariosNancy_new WHERE id = @id');
+            const result = await request.query('DELETE FROM usuariosNancy_new WHERE id = @id');
 
-            res.json({ mensaje: 'Usuario eliminado correctamente' });
+            if (result.rowsAffected[0] === 0) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+
+            res.status(200).json({ mensaje: 'Usuario eliminado correctamente' });
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: 'Error al eliminar usuario' });
